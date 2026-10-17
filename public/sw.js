@@ -1,20 +1,7 @@
-// Offline-capable Service Worker with API caching for WordPlay
-const CACHE_NAME = 'wordplay-v3';
-const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './favicon.svg',
-  './icon-192.svg',
-  './icon-512.svg'
-];
+// Offline-capable Service Worker for WordPlay
+const CACHE_NAME = 'wordplay-v5';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
-  );
   self.skipWaiting();
 });
 
@@ -38,27 +25,42 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Strategy 1: Cache static app assets
-  if (url.origin === location.origin) {
+  // Strategy 1: HTML Navigation - Always Network First to prevent blank page lockup
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match(event.request).then((cached) => {
-        return cached || fetch(event.request).then((response) => {
+      fetch(event.request)
+        .then((response) => {
           if (response.status === 200) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           }
           return response;
-        }).catch(() => {
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Strategy 2: Same-origin static assets (JS, CSS, SVGs, Fonts)
+  if (url.origin === location.origin) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           }
+          return response;
         });
       })
     );
     return;
   }
 
-  // Strategy 2: Cache API calls (Dictionary API & Datamuse) with network-first and cache fallback
+  // Strategy 3: External APIs (dictionary / datamuse) - Cache on success
   if (url.hostname.includes('dictionaryapi.dev') || url.hostname.includes('datamuse.com')) {
     event.respondWith(
       fetch(event.request)

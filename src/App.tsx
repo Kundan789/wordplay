@@ -9,6 +9,7 @@ import { CardStack } from './components/CardStack';
 import { ControlsBar } from './components/ControlsBar';
 import { RememberLibraryModal } from './components/RememberLibraryModal';
 import { InstallModal } from './components/InstallModal';
+import { AboutModal } from './components/AboutModal';
 import { BottomNav } from './components/BottomNav';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import confetti from 'canvas-confetti';
@@ -38,6 +39,7 @@ export const App: React.FC = () => {
   // PWA install prompt event & Install Popup modal
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState<boolean>(false);
+  const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
   const [isStandalone, setIsStandalone] = useState<boolean>(false);
 
   const isFetchingRef = useRef(false);
@@ -309,6 +311,7 @@ export const App: React.FC = () => {
         stats={stats}
         savedCount={savedWords.length}
         onOpenLibrary={handleOpenLibrary}
+        onOpenAbout={() => setIsAboutOpen(true)}
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
         isSlowSpeed={isSlowSpeed}
@@ -361,6 +364,12 @@ export const App: React.FC = () => {
           }}
         />
       </ErrorBoundary>
+
+      {/* About WordPlay & Links Modal */}
+      <AboutModal
+        isOpen={isAboutOpen}
+        onClose={() => setIsAboutOpen(false)}
+      />
 
       {/* Download / Install App Popup Modal (Only on browser web, never inside installed standalone app) */}
       {!isStandalone && (

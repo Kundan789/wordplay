@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookMarked, Flame, Volume2, VolumeX, Gauge } from 'lucide-react';
+import { BookMarked, Flame, Volume2, VolumeX, Gauge, Info } from 'lucide-react';
 import { WordCategory, UserStats } from '../types';
 
 interface HeaderProps {
@@ -8,6 +8,7 @@ interface HeaderProps {
   stats: UserStats;
   savedCount: number;
   onOpenLibrary: () => void;
+  onOpenAbout: () => void;
   isMuted: boolean;
   onToggleMute: () => void;
   isSlowSpeed: boolean;
@@ -28,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   stats,
   savedCount,
   onOpenLibrary,
+  onOpenAbout,
   isMuted,
   onToggleMute,
   isSlowSpeed,
@@ -87,6 +89,17 @@ export const Header: React.FC<HeaderProps> = ({
             title={isMuted ? 'Unmute sounds' : 'Mute sounds'}
           >
             {isMuted ? <VolumeX className="w-3.5 h-3.5 text-rose-400" /> : <Volume2 className="w-3.5 h-3.5 text-sky-400" />}
+          </button>
+
+          {/* About App Info Button */}
+          <button
+            type="button"
+            onClick={onOpenAbout}
+            aria-label="About WordPlay and links"
+            className="p-1.5 rounded-full bg-slate-900 text-slate-400 hover:text-sky-400 border border-slate-800 transition-colors shadow-sm"
+            title="About WordPlay & App Link"
+          >
+            <Info className="w-3.5 h-3.5" />
           </button>
 
           {/* Remember Library Button - Visible on Desktop / Tablets (hidden on small phones where BottomNav takes over) */}
